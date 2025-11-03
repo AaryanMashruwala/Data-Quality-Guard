@@ -1,0 +1,5 @@
+pandas>=2.0
+duckdb>=0.9
+pandera>=0.18
+pytest>=7.0
+pytest-html>=4.0
