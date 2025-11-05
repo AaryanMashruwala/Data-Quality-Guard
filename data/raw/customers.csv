@@ -1,0 +1,6 @@
+customer_id,name,email,signup_date,country
+1,Alice Johnson,alice@example.com,2024-01-15,US
+2,Bob Singh,bob@example.com,2024-02-10,IN
+3,Carla Mendes,carla@example.com,2024-03-05,BR
+4,David Lee,david@example.com,2024-03-20,CA
+5,Emma Rossi,emma@example.com,2024-04-01,IT
