@@ -16,12 +16,14 @@ from checks.orders_checks import (
     count_orders_with_missing_customer,
     count_orders_with_invalid_status,
     count_orders_before_customer_signup,
+    get_order_amount_mean_drift_ratio,
 )
 
 
 
 
 @pytest.fixture(scope="module", autouse=True)
+
 def load_data():
     """
     This runs once before the tests in this file.
@@ -75,3 +77,11 @@ def test_no_orders_before_customer_signup():
     bad_time_count = count_orders_before_customer_signup()
     assert bad_time_count == 0
 
+
+def test_order_amount_mean_has_not_drifted_too_much():
+    """
+    Drift rule: the average order amount should not change by more than 50%
+    compared to the saved baseline.
+    """
+    drift_ratio = get_order_amount_mean_drift_ratio()
+    assert drift_ratio <= 0.5

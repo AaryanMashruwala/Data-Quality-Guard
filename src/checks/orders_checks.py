@@ -6,10 +6,12 @@ Right now: one check that verifies there are no negative amounts.
 
 from pathlib import Path
 import duckdb
+import json
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
 DB_PATH = DATA_DIR / "warehouse.duckdb"
+BASELINES_DIR = DATA_DIR / "baselines"
 
 
 def count_negative_order_amounts() -> int:
@@ -92,3 +94,29 @@ def count_orders_before_customer_signup() -> int:
     return count
 
 
+def get_order_amount_mean_drift_ratio() -> float:
+    """
+    Compare the current mean(order.amount) to the saved baseline.
+    Return the relative change as a ratio (0.0 = no change, 0.5 = 50% change).
+    """
+
+    baseline_path = BASELINES_DIR / "orders_amount_baseline.json"
+    with baseline_path.open("r", encoding="utf-8") as f:
+        baseline = json.load(f)
+
+    baseline_mean = baseline["mean_amount"]
+
+    with duckdb.connect(str(DB_PATH)) as con:
+        (_, current_mean) = con.execute(
+            "SELECT COUNT(*), AVG(amount) FROM orders"
+        ).fetchone()
+
+    # Avoid division by zero if the baseline mean is 0
+    if baseline_mean == 0:
+        if current_mean == 0:
+            return 0.0
+        else:
+            return 1.0  # treat as 100%+ change
+
+    drift_ratio = abs(current_mean - baseline_mean) / abs(baseline_mean)
+    return float(drift_ratio)
